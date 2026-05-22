@@ -504,49 +504,11 @@ plnt_df <- df_plant1 %>%
          ash = as.factor(ash),
          inv_tot = cheat_total + spot_total)
 
-# Cover of spotted knapweed only
-g_m2 <- lmer(spot_total ~ time*ash*sprayed + (1|site), subset(plnt_df, time != "baseline"))
-car::Anova(g_m2)
-
-emmeans(g_m2, ~  sprayed) %>% 
-  multcomp::cld()
-
-# Cover of cheatgrass only
-g_m3 <- lmer(log1p(cheat_total) ~ time*ash*sprayed + (1|site), subset(plnt_df, time != "baseline"))
-car::Anova(g_m3)
-DHARMa::simulateResiduals(g_m3, plot = T)
-
-emmeans(g_m3, ~  time) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m3, ~  ash) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m3, ~  sprayed) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m3, ~  time|sprayed) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m3, ~  ash|sprayed) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m3, ~  ash*time*sprayed) %>% 
-  multcomp::cld(Letters = letters)
-
-# Invasive total (i.e., knapweed + cheatgrass)
-g_m4 <- lmer(inv_tot ~ time*ash*sprayed + (1|site), subset(plnt_df, time != "baseline"))
-car::Anova(g_m4)
-DHARMa::simulateResiduals(g_m4, plot = T)
-
-emmeans(g_m4, ~  time) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m4, ~  time|sprayed) %>% 
-  multcomp::cld(Letters = letters)
-
-emmeans(g_m4, ~  ash|sprayed) %>% 
-  multcomp::cld(Letters = letters)
+# Model for relative proportion of dominant invasive plants
+mod_inv <- glmmTMB::glmmTMB(value ~ name * year + (1|site), family = "ordbeta", inv_res)
+car::Anova(mod_inv)
+DHARMa::simulateResiduals(mod_inv, plot = T)
+emmeans(mod_inv, ~ name|year, type = "response") %>% multcomp::cld(Letters = letters)
 
 # combined cheatgrass and knapweed
 
