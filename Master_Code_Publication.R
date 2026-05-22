@@ -86,7 +86,9 @@ names(df_plant_tree) <- sp_name
 
 # Seeding had no impact so dropped it and dropped 2018 year
 m1 <- lmer(richness ~ sprayed*ash*time + (1|site),  subset(df_plant, year != 2018)) 
-car::Anova(m1, test.statistic = "F")
+car::Anova(m1, test.statistic = "F") %>% 
+  broom::tidy() %>% 
+  write.csv("Output/Richness_lmer.csv", row.names = FALSE)
 simulateResiduals(m1, plot = TRUE)
 
 # Posthoc plot for species richness differences when sprayed
@@ -186,7 +188,9 @@ pd_veg <- pd(matched$comm, tree = mytree, include.root = TRUE) %>%
   inner_join(., meta, by = "id")
 
 phy_m1 <- lmer(PD ~ sprayed*ash*time + (1|site),  subset(pd_veg, year != 2018)) # seeding had no impact so dropped it and dropped 2018 year
-car::Anova(phy_m1, test.statistic = "F")
+car::Anova(phy_m1, test.statistic = "F") %>% 
+  broom::tidy() %>% 
+  write.csv("Output/PD_lmer.csv", row.names = FALSE)
 DHARMa::simulateResiduals(phy_m1, plot = T)
 effectsize::eta_squared(phy_m1 , partial = TRUE)
 
@@ -505,42 +509,66 @@ plnt_df <- df_plant1 %>%
          inv_tot = cheat_total + spot_total)
 
 # Model for relative proportion of dominant invasive plants
+inv_res <- df_plant1 %>% 
+  select(year, site, cheat_total, spot_total) %>% 
+  pivot_longer(-c(year,site)) %>% 
+  mutate(year = as.factor(year))
+
 mod_inv <- glmmTMB::glmmTMB(value ~ name * year + (1|site), family = "ordbeta", inv_res)
-car::Anova(mod_inv)
+car::Anova(mod_inv) %>% 
+  broom::tidy() %>% 
+  write.csv("Output/Relative_proportion_glmmTMB.csv", row.names = FALSE)
 DHARMa::simulateResiduals(mod_inv, plot = T)
-emmeans(mod_inv, ~ name|year, type = "response") %>% multcomp::cld(Letters = letters)
 
-# combined cheatgrass and knapweed
-
-inv_prop_plot <- df_plant1 %>% 
-  select(year, cheat_total, spot_total) %>% 
-  pivot_longer(-year) %>% 
-  ggplot(., aes(x = year, y = value, color = name)) +
-  stat_summary(geom = "pointrange", fun.data = mean_se,
-               size = 0.75,
-               linewidth = 2,
-               show.legend = F) +
-  stat_summary(fun = mean, geom = "line",
-               linewidth = 2, show.legend = T)+
-  scale_x_continuous(labels = c("2018", "", "2019", "", "2020")) +
-  scale_y_continuous(labels = scales::percent) +
-  theme_bw(base_size = 18) + 
+# Plot
+inv_prop_plot <- emmeans(mod_inv, ~ name | year, type = "response") %>%
+  multcomp::cld(Letters = letters) %>%
+  as.data.frame() %>%
+  mutate(.group = str_trim(.group, side = "both")) %>%
+  ggplot(
+    .,
+    aes(
+      x = year,
+      y = response,
+      color = name,
+      ymin = response - SE,
+      ymax = response + SE,
+      label = .group,
+      group = name,
+    )
+  ) +
+  geom_point(position = position_dodge(width = 0.01),
+             size = 3.5,
+             show.legend = FALSE)+
+  geom_errorbar(width = 0,
+                linewidth = 2,
+                position = position_dodge(width = 0.01)) +
+  geom_text(nudge_y = -0.005,
+            nudge_x = -0.1,
+            size = 5, 
+            show.legend = FALSE) +
+  geom_line()      +
+  scale_x_discrete(expand = expansion(mult = 0, add = 0.2)) +
+  scale_y_continuous(labels = scales::percent,
+                     limits = c(0.2,0.6)) +
+  theme_bw(base_size = 18) +
   scale_color_viridis_d(
     name = NULL,
     label = c("*Bromus tectorum*", "*Centaurea stoebe*"),
     begin = 0.2,
     end = 0.8
   ) +
-  theme(legend.position = "inside",
-        legend.position.inside = c(0.8, 0.9),
-        legend.text = element_markdown(face = "bold"),
-        axis.ticks.x = element_blank(),
-        panel.grid = element_blank(),
-        axis.text = element_text(color = "black", face = "bold"),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(face = "bold")) +
-  labs(y = "Relative proportion (%)") 
-inv_prop_plot
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.8, 0.9),
+    legend.text = element_markdown(face = "bold"),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank(),
+    axis.text = element_text(color = "black", face = "bold"),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(face = "bold")
+  ) +
+  labs(y = "Relative proportion")
 
 ggsave("Plots/inv_prop_plot.png", inv_prop_plot, height = 6, width = 8, dpi = 800)
 
