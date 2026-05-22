@@ -537,20 +537,22 @@ inv_prop_plot <- emmeans(mod_inv, ~ name | year, type = "response") %>%
       group = name,
     )
   ) +
-  geom_point(position = position_dodge(width = 0.01),
-             size = 3.5,
+  geom_point(position = position_dodge(width = 0.05),
+             size = 5,
              show.legend = FALSE)+
   geom_errorbar(width = 0,
                 linewidth = 2,
-                position = position_dodge(width = 0.01)) +
+                position = position_dodge(width = 0.05)) +
   geom_text(nudge_y = -0.005,
-            nudge_x = -0.1,
+            nudge_x = -0.075,
             size = 5, 
-            show.legend = FALSE) +
+            show.legend = FALSE,
+            fontface = "bold") +
   geom_line()      +
   scale_x_discrete(expand = expansion(mult = 0, add = 0.2)) +
   scale_y_continuous(labels = scales::percent,
-                     limits = c(0.2,0.6)) +
+                     limits = c(0.15,0.6),
+                     breaks = seq(0.2,0.6, 0.1)) +
   theme_bw(base_size = 18) +
   scale_color_viridis_d(
     name = NULL,
@@ -569,6 +571,7 @@ inv_prop_plot <- emmeans(mod_inv, ~ name | year, type = "response") %>%
     axis.title.y = element_text(face = "bold")
   ) +
   labs(y = "Relative proportion")
+inv_prop_plot
 
 ggsave("Plots/inv_prop_plot.png", inv_prop_plot, height = 6, width = 8, dpi = 800)
 
