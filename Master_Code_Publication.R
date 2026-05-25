@@ -10,7 +10,6 @@ library(lme4)
 library(lmerTest)
 library(pairwiseAdonis)
 library(easystats)
-# library(mgcv)
 library(patchwork)
 library(V.PhyloMaker2)
 library(ggtree)
@@ -18,6 +17,7 @@ library(ggtreeExtra)
 library(picante)
 library(DHARMa)
 library(GUniFrac)
+library(glmmTMB)
 
 # Import data -------------------------------------------------------------
 
@@ -173,10 +173,6 @@ ph_ts_rich <- emmeans(m1, ~ time*sprayed) %>%
   labs(y = "Observed species richness", x = NULL)
 ph_ts_rich
 
-# Save figures
-# ggsave("Plots/posthoc_sprayed_richness.png", ph_s_rich, width = 6, height = 6, dpi = 800)
-# ggsave("Plots/posthoc_ash_sprayed_richness.png", ph_as_rich, width = 8, height = 6, dpi = 800)
-# ggsave("Plots/posthoc_time_sprayed_richness.png", ph_ts_rich, width = 8, height = 6, dpi = 800)
 
 # Phylogenetic alpha diversity analysis ----------------------------------------
 
@@ -204,10 +200,7 @@ ph_s_pd <- emmeans(phy_m1, ~ sprayed, type  = "response") %>%
   geom_text(aes( y = emmean + SE + 30)) +
   scale_x_discrete(breaks = c("FALSE", "TRUE"),
                    labels = c("Unsprayed", "Sprayed")) +
-  # coord_cartesian(
-  #   ylim = c(0, 10), 
-  #   expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)) +
-  theme_bw(base_size = 16) +
+   theme_bw(base_size = 16) +
   theme(
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
@@ -384,7 +377,6 @@ phy_nmds <- ggplot(
         legend.key.size =  unit(5, "pt"),
         legend.key.spacing =  unit(5, "pt"),
         legend.spacing = unit(30, "pt"),
-        #legend.box = "vertical",
         legend.box.just = "left",
         legend.title = element_text(size =15, face = "bold"),
         text = element_text(color = "black", face = "bold"),
@@ -412,6 +404,30 @@ set.seed(1111111)
 mod_ado1 <- adonis2(soren$beta.sim ~ sprayed*ash*time, by = "term",  meta)
 mod_ado1_df <- data.frame(mod_ado1)
 write.csv(mod_ado1_df, "Output/Species_turnover_PERMANOVA.csv", row.names = TRUE)
+
+#Pairwise adonis 
+rough_meta <- meta %>% 
+  mutate(trt = paste(sprayed, time, sep = "_"))
+
+
+set.seed(20260525)
+pair_ado_turn <- pairwise.adonis2(soren$beta.sim ~ trt, by = "term",  rough_meta)
+write.csv(pair_ado_turn$FALSE_year_1_vs_TRUE_year_1,
+          "Output/Species_turnover_PERMANOVA_year2019.csv",
+          row.names = TRUE)
+write.csv(pair_ado_turn$FALSE_year_2_vs_TRUE_year_2,
+          "Output/Species_turnover_PERMANOVA_year2020.csv",
+          row.names = TRUE)
+
+set.seed(202605252)
+pair_ado_nest <- pairwise.adonis2(soren$beta.sne ~ trt, by = "term",  rough_meta)
+write.csv(pair_ado_nest$FALSE_year_1_vs_TRUE_year_1,
+          "Output/Species_nest_PERMANOVA_year2019.csv",
+          row.names = TRUE)
+write.csv(pair_ado_nest$FALSE_year_2_vs_TRUE_year_2,
+          "Output/Species_nest_PERMANOVA_year2020.csv",
+          row.names = TRUE)
+
 
 set.seed(11)
 nmds_sim <- metaMDS(soren$beta.sim, k =3,  trymax = 999)
@@ -548,7 +564,9 @@ inv_prop_plot <- emmeans(mod_inv, ~ name | year, type = "response") %>%
             size = 5, 
             show.legend = FALSE,
             fontface = "bold") +
-  geom_line()      +
+  geom_vline(xintercept = 1.25, linetype = "dotdash", color = "grey40") +
+  annotate(geom = "text", label = "Herbicide\napplied", x = 1.45, y = 0.17, size = 5, color = "grey40") +
+  geom_line() +
   scale_x_discrete(expand = expansion(mult = 0, add = 0.2)) +
   scale_y_continuous(labels = scales::percent,
                      limits = c(0.15,0.6),
