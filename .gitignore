@@ -53,3 +53,6 @@ Plots
 Output
 .positai
 .Rproj.user
+
+# Images
+*.png

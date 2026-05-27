@@ -629,5 +629,5 @@ lgm <- bcdc_query_geodata("263338a7-93ee-49c1-83e8-13f0bde70833", crs = 3153) %>
 
 # Write to geopackage for importing into QGIS
 sites <- rbind(mer, lgm)
-st_write(sites, "Output/BC_Data_Layers.gpkg", layer = "general_sites", delete_layer = TRUE)
-st_write(bc_boundary, "Output/BC_Data_Layers.gpkg", layer = "bc", delete_layer = TRUE)
+st_write(sites, "Map/BC_Data_Layers.gpkg", layer = "general_sites", delete_layer = TRUE)
+st_write(bc_boundary, "Map/BC_Data_Layers.gpkg", layer = "bc", delete_layer = TRUE)
