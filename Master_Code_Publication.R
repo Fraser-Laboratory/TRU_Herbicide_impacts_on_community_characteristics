@@ -1,23 +1,33 @@
-library(rstatix)
-library(tidyverse)
-library(ggpubr)
-library(ggtext)
-library(emmeans)
-library(vegan)
-library(betapart)
-library(janitor)
-library(lme4)
-library(lmerTest)
-library(pairwiseAdonis)
-library(easystats)
-library(patchwork)
-library(V.PhyloMaker2)
-library(ggtree)
-library(ggtreeExtra)
-library(picante)
-library(DHARMa)
-library(GUniFrac)
-library(glmmTMB)
+# CRAN packages
+ls <- c("rstatix", "tidyverse", "ggpubr", "ggtext", "emmeans", "vegan", "betapart",
+        "janitor", "lme4", "lmerTest", "easystats", "devtools", "BiocManager",
+        "patchwork", "picante", "DHARMa", "GUniFrac", "glmmTMB", "sf", "bcdata",
+        "bcmaps")
+
+new_packages <- ls[!(ls %in% installed.packages()[,"Package"])]
+if(length(new_packages)) install.packages(new_packages)
+
+# pairwiseAdonis, V.Phylomaker2, ggtree, and ggtreeExtra packages are not on CRAN, 
+# install using devtools/BiocManager if needed
+if(!"pairwiseAdonis" %in% installed.packages()[,"Package"]) {
+  devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+}
+if(!"V.PhyloMaker2" %in% installed.packages()[,"Package"]) {
+  devtools::install_github("jinyizju/V.PhyloMaker2")
+}
+if(!"ggtree" %in% installed.packages()[,"Package"]) {
+  BiocManager::install("ggtree", update = FALSE)
+}
+if(!"ggtreeExtra" %in% installed.packages()[,"Package"]) {
+  BiocManager::install("ggtreeExtra", update = FALSE)
+}
+
+# Load packages, don't need devtools or BiocManager loaded
+ls <- c(ls[!ls %in% c("devtools", "BiocManager")], 
+        "pairwiseAdonis", "V.PhyloMaker2", "ggtree", "ggtreeExtra")
+invisible(suppressPackageStartupMessages(
+  lapply(ls, function(x) library(x, character.only = TRUE))))
+rm(ls, new_packages)
 
 # Import data -------------------------------------------------------------
 
@@ -107,6 +117,7 @@ ph_s_rich <- emmeans(m1, ~ sprayed, type  = "response") %>%
     expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)) +
   theme_bw(base_size = 16) +
   theme(
+    text = element_text(family = "Times New Roman"),
     panel.grid = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_text(face = "bold"),
@@ -593,3 +604,30 @@ inv_prop_plot
 
 ggsave("Plots/inv_prop_plot.png", inv_prop_plot, height = 6, width = 8, dpi = 800)
 
+
+# Map data ----------------------------------------------
+
+# Get the BC Boundary layer
+bc_boundary <- bc_bound(ask = FALSE, force = TRUE) %>% 
+  st_union() %>% 
+  st_transform(3153) %>% 
+  st_sf() %>% 
+  mutate(name = "British Columbia")
+
+# Get the municipal boundary for the City of Merritt
+mer <- municipalities() %>% 
+  filter(ADMIN_AREA_ABBREVIATION == "Merritt") %>% 
+  select(name = ADMIN_AREA_ABBREVIATION) %>% 
+  st_transform(3153)
+
+# Laurie Guichon Memorial Grasslands Interpretive Site
+lgm <- bcdc_query_geodata("263338a7-93ee-49c1-83e8-13f0bde70833", crs = 3153) %>% 
+  filter(PROJECT_NAME == "GRASSLANDS INTERPRETIVE AREA") %>% 
+  collect() %>% 
+  mutate(name = "Laurie Guichon Memorial Grasslands Interpretive Site") %>% 
+  select(name)
+
+# Write to geopackage for importing into QGIS
+sites <- rbind(mer, lgm)
+st_write(sites, "Output/BC_Data_Layers.gpkg", layer = "general_sites", delete_layer = TRUE)
+st_write(bc_boundary, "Output/BC_Data_Layers.gpkg", layer = "bc", delete_layer = TRUE)
