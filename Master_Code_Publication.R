@@ -1,15 +1,14 @@
 # Install and load packages ----------------------------------------------------
 
 # CRAN packages
-ls <- c("rstatix", "tidyverse", "ggpubr", "ggtext", "emmeans", "vegan", 
-        "betapart", "janitor", "lme4", "lmerTest", "easystats", "patchwork", 
-        "picante", "DHARMa", "GUniFrac", "glmmTMB", "sf", "bcdata", "bcmaps", 
-        "devtools", "BiocManager", "conflicted")
-
+ls <- c("tidyverse", "ggtext", "emmeans", "vegan", "betapart", "janitor", "car",
+        "lme4", "easystats", "patchwork", "picante", "DHARMa", "GUniFrac", 
+        "glmmTMB", "sf", "bcdata", "bcmaps", "devtools", "conflicted")
+        
 new_packages <- ls[!(ls %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 
-# pairwiseAdonis, V.Phylomaker2, ggtree, and ggtreeExtra packages are not on 
+# pairwiseAdonis, and V.Phylomaker2 packages are not on 
 # CRAN, install using devtools or BiocManager if needed
 if(!"pairwiseAdonis" %in% installed.packages()[,"Package"]) {
   devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
@@ -17,16 +16,10 @@ if(!"pairwiseAdonis" %in% installed.packages()[,"Package"]) {
 if(!"V.PhyloMaker2" %in% installed.packages()[,"Package"]) {
   devtools::install_github("jinyizju/V.PhyloMaker2")
 }
-if(!"ggtree" %in% installed.packages()[,"Package"]) {
-  BiocManager::install("ggtree", update = FALSE)
-}
-if(!"ggtreeExtra" %in% installed.packages()[,"Package"]) {
-  BiocManager::install("ggtreeExtra", update = FALSE)
-}
 
-# Load packages, don't need devtools or BiocManager loaded
-ls <- c(ls[!ls %in% c("devtools", "BiocManager")], 
-        "pairwiseAdonis", "V.PhyloMaker2", "ggtree", "ggtreeExtra")
+# Load packages, don't need devtools or car loaded
+ls <- c(ls[!ls %in% c("devtools", "car")], 
+        "pairwiseAdonis", "V.PhyloMaker2")
 invisible(suppressPackageStartupMessages(
   lapply(ls, function(x) library(x, character.only = TRUE))))
 rm(ls, new_packages)
@@ -606,7 +599,7 @@ nestedness_plot <- ggplot(plot_df_sne, aes(x = NMDS1, y = NMDS2, fill = sprayed)
 nestedness_plot
 
 # Combine turnover and nestedness figures
-comb_nest_turn <- turnover_plot/nestedness_plot + 
+comb_nest_turn <- turnover_plot / nestedness_plot + 
   plot_layout(guides = "collect", axes = "collect") & 
   theme(legend.position = "bottom", panel.spacing = unit(1.5, "lines"))
 comb_nest_turn
@@ -721,7 +714,7 @@ lgm <- bcdc_query_geodata("263338a7-93ee-49c1-83e8-13f0bde70833", crs = 3153) %>
 
 # Write to geopackage for importing into QGIS
 sites <- rbind(mer, lgm)
-st_write(sites, "Map/BC_Data_Layers.gpkg", layer = "general_sites",
-         delete_layer = TRUE)
-st_write(bc_boundary, "Map/BC_Data_Layers.gpkg", layer = "bc", 
-         delete_layer = TRUE)
+# st_write(sites, "Map/BC_Data_Layers.gpkg", layer = "general_sites",
+#          delete_layer = TRUE)
+# st_write(bc_boundary, "Map/BC_Data_Layers.gpkg", layer = "bc", 
+#          delete_layer = TRUE)
