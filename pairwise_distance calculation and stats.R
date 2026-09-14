@@ -1,6 +1,5 @@
+source("Master_Code_Publication.R")
 library(rstatix)
-
-
 
 ##no significant different in PD or SR for controls (i.e. absence of any treatment) across different years
 ## We can use this figure to show that the SR and PD in baseline and untreated sites are not significantly different
@@ -59,10 +58,10 @@ dist_from_baseline <- dat_mat %>%
 str(dist_from_baseline)
 
 
-m_dist <- lmer((mean_val) ~ rowname_time * sprayed + (1|name), 
-                   dist_from_baseline) 
-DHARMa::simulateResiduals(m_dist, plot = T)
-car::Anova(m_dist, test.statistic = "F")
+# m_dist <- lmer((mean_val) ~ rowname_time * sprayed + (1|name), 
+#                    dist_from_baseline) 
+# DHARMa::simulateResiduals(m_dist, plot = T)
+# car::Anova(m_dist, test.statistic = "F")
   plt <- ggplot(dist_from_baseline, aes(x = sprayed, y = mean_val)) +
   # stat_summary(geom = "pointrange", fun.data = "mean_sdl",
   #              linewidth = 1.5, size = 1.5, color = "black",
@@ -85,6 +84,6 @@ car::Anova(m_dist, test.statistic = "F")
 }
 dist_analysis(bray_dist)
 dist_analysis(weighted_unifrac)
-dist_analysis(soren$beta.sim)
-dist_analysis(soren$beta.sne)
+dist_analysis(soren$beta.sim) + labs(y = "Sorensen distance (Turnover)\ndifference from baseline")
+dist_analysis(soren$beta.sne) + labs(y = "Sorensen distance (Nestedness)\ndifference from baseline")
 

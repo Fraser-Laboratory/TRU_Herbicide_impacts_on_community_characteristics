@@ -114,13 +114,15 @@ simulateResiduals(m1, plot = TRUE)
 ph_s_rich <- emmeans(m1, ~ sprayed, type = "response") %>% 
   multcomp::cld(Letters = letters) %>% 
   as.data.frame() %>% 
-  mutate(.group = str_trim(.group, side = "both")) %>% 
+  mutate(.group = str_trim(.group, side = "both"),
+         labels = "A") %>% 
   ggplot(., aes(x = sprayed, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
   geom_text(aes(y = emmean + SE + 0.5)) +
+  geom_label(aes(x = 0.65, y = 9, label = labels)) +
   scale_x_discrete(
     breaks = c("FALSE", "TRUE"), labels = c("Unsprayed", "Sprayed")
   ) +
@@ -145,20 +147,23 @@ ph_as_rich <- emmeans(m1, ~ ash * sprayed) %>%
   mutate(
     .group = str_trim(.group, side = "both"),
     ash = factor(ash, levels = c("none", "low", "high")),
-    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed")
+    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed"),
+    labels = rep(c("A", "B"), each = 3)
   ) %>% 
   ggplot(., aes(x = ash, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
-  facet_wrap(~ sprayed) +
+  facet_wrap(~ sprayed, axes = "all", axis.labels = "all") +
   geom_text(aes(y = emmean + SE + 0.5)) +
+  geom_label( aes(label = labels,
+                 x = 0.65, y = 11)) +
   scale_x_discrete(
     breaks = c("none", "low", "high"), labels = c("None", "Low", "High")
   ) +
   coord_cartesian(
-    ylim = c(0, 11), 
+    ylim = c(0, 12.25), 
     expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)
   ) +
   theme_bw(base_size = 16) +
@@ -171,6 +176,7 @@ ph_as_rich <- emmeans(m1, ~ ash * sprayed) %>%
     axis.ticks.x = element_blank()
   ) +
   labs(y = "Observed species richness", x = NULL)
+
 ph_as_rich
 
 # Posthoc for time * sprayed
@@ -180,15 +186,17 @@ ph_ts_rich <- emmeans(m1, ~ time * sprayed) %>%
   mutate(
     .group = str_trim(.group, side = "both"),
     time = factor(time, levels = c("year_1", "year_2")),
-    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed")
+    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed"),
+    labels = rep(c("A", "B"), each = 2)
   ) %>% 
   ggplot(., aes(x = time, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
-  facet_wrap(~ sprayed) +
+  facet_wrap(~ sprayed, axes = "all", axis.labels = "all") +
   geom_text(aes(y = emmean + SE + 0.5)) +
+  geom_label(aes(x = 0.65, y = 10, label = labels)) +
   scale_x_discrete(
     breaks = c("year_1", "year_2"), labels = c("2019", "2020")
   ) +
@@ -239,13 +247,15 @@ effectsize::eta_squared(phy_m1 , partial = TRUE)
 ph_s_pd <- emmeans(phy_m1, ~ sprayed, type = "response") %>% 
   multcomp::cld(Letters = letters) %>% 
   as.data.frame() %>% 
-  mutate(.group = str_trim(.group, side = "both")) %>% 
+  mutate(.group = str_trim(.group, side = "both"),
+         labels = "B") %>% 
   ggplot(., aes(x = sprayed, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
   geom_text(aes(y = emmean + SE + 30)) +
+  geom_label(aes(x = 0.65, y = 745, label = labels)) +
   scale_x_discrete(
     breaks = c("FALSE", "TRUE"), labels = c("Unsprayed", "Sprayed")
   ) +
@@ -256,7 +266,11 @@ ph_s_pd <- emmeans(phy_m1, ~ sprayed, type = "response") %>%
     axis.title.y = element_text(face = "bold"),
     axis.text = element_text(face = "bold", color = "black")
   ) +
-  labs(y = "Faith's phylogenetic diversity")
+  labs(y = "Faith's phylogenetic diversity") +
+  coord_cartesian(
+    ylim = c(250, 800), 
+    expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)
+  )
 ph_s_pd
 
 # Posthoc for ash * sprayed
@@ -266,15 +280,17 @@ ph_as_pd <- emmeans(phy_m1, ~ ash * sprayed) %>%
   mutate(
     .group = str_trim(.group, side = "both"),
     ash = factor(ash, levels = c("none", "low", "high")),
-    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed")
+    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed"),
+    labels = rep(c("C", "D"), each = 3)
   ) %>% 
   ggplot(., aes(x = ash, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
-  facet_wrap(~ sprayed) +
+  facet_wrap(~ sprayed, axes = "all", axis.labels = "all") +
   geom_text(aes(y = emmean + SE + 30)) +
+  geom_label(aes(x = 0.65, y = 850, label = labels)) +
   scale_x_discrete(
     breaks = c("none", "low", "high"), labels = c("None", "Low", "High")
   ) +
@@ -287,7 +303,11 @@ ph_as_pd <- emmeans(phy_m1, ~ ash * sprayed) %>%
     strip.text.x = element_blank(),
     strip.background = element_blank()
   ) +
-  labs(y = "Faith's phylogenetic diversity", x = "Ash treatment")
+  labs(y = "Faith's phylogenetic diversity", x = "Ash treatment") + 
+  coord_cartesian(
+    ylim = c(200, 900), 
+    # expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)
+  ) 
 ph_as_pd
 
 # Posthoc for time * sprayed
@@ -297,15 +317,17 @@ ph_ts_pd <- emmeans(phy_m1, ~ time * sprayed) %>%
   mutate(
     .group = str_trim(.group, side = "both"),
     time = factor(time, levels = c("year_1", "year_2")),
-    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed")
+    sprayed = ifelse(sprayed, "Sprayed", "Unsprayed"),
+    labels = rep(c("C", "D"), each = 2)
   ) %>% 
   ggplot(., aes(x = time, y = emmean, label = .group)) +
   geom_pointrange(
     aes(ymin = emmean - SE, ymax = emmean + SE),
     pch = 23, fill = "steelblue", size = 1.1, linewidth = 1.2
   ) +
-  facet_wrap(~ sprayed) +
+  facet_wrap(~ sprayed, axes = "all", axis.labels = "all") +
   geom_text(aes(y = emmean + SE + 30)) +
+  geom_label(aes(x = 0.65, y = 850, label = labels)) +
   scale_x_discrete(
     breaks = c("year_1", "year_2"), labels = c("2019", "2020")
   ) +
@@ -318,7 +340,11 @@ ph_ts_pd <- emmeans(phy_m1, ~ time * sprayed) %>%
     strip.text.x = element_blank(),
     strip.background = element_blank()
   ) +
-  labs(y = "Faith's phylogenetic diversity", x = NULL)
+  labs(y = "Faith's phylogenetic diversity", x = NULL) + 
+  coord_cartesian(
+    ylim = c(200, 900), 
+    # expand = c(top = FALSE, left = TRUE, bottom = FALSE, right = TRUE)
+  )
 ph_ts_pd
 
 # Overall decrease in Faith's phylogenetic diversity from unsprayed to sprayed
@@ -340,9 +366,9 @@ alpha_div_ts <- ph_ts_rich / ph_ts_pd; alpha_div_ts
 ggsave("Plots/Figure2_alpha_diversity_sprayed.png", alpha_div_s, 
        height = 4, width = 8, dpi = 800, units = "in")
 ggsave("Plots/Figure3_alpha_diversity_sprayed_ash.png", alpha_div_as, 
-       height = 8, width = 8, dpi = 800, units = "in")
+       height = 8, width = 10, dpi = 800, units = "in")
 ggsave("Plots/Figure4_alpha_diversity_sprayed_time.png", alpha_div_ts, 
-       height = 8, width = 8, dpi = 800, units = "in")
+       height = 8, width = 10, dpi = 800, units = "in")
 
 # Beta diversity analysis ------------------------------------------------------
 
