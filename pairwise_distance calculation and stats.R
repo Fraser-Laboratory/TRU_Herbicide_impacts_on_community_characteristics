@@ -2,6 +2,41 @@ library(rstatix)
 
 
 
+##no significant different in PD or SR for controls (i.e. absence of any treatment) across different years
+## We can use this figure to show that the SR and PD in baseline and untreated sites are not significantly different
+pd_veg %>% 
+  filter(sprayed == FALSE & ash == "none") %>% 
+  group_by(year) %>% 
+  # summarise(mean_Pd = mean(PD),
+  #           sd_Pd = sd(PD),
+  #           mean_rich = mean(SR),
+  #           sd_rich = sd(SR)) %>% 
+  ggplot(., aes(x = as.factor(year), y = SR)) +
+  geom_boxplot(fill = "steelblue") +
+  stat_summary(geom = "point", fun = "mean", shape = 23, size = 5, fill = "black")+
+  theme_bw() +
+ scale_y_continuous(breaks = seq(0, 15, 1),
+                    label =  seq(0, 15, 1)) +
+  ggpubr::geom_pwc(ref.group = "2018",
+                   label = "p.signif")
+
+pd_veg %>% 
+  filter(sprayed == FALSE & ash == "none") %>% 
+  group_by(year) %>% 
+  # summarise(mean_Pd = mean(PD),
+  #           sd_Pd = sd(PD),
+  #           mean_rich = mean(SR),
+  #           sd_rich = sd(SR)) %>% 
+  ggplot(., aes(x = as.factor(year), y = PD)) +
+  geom_boxplot(fill = "steelblue") +
+  stat_summary(geom = "point", fun = "mean", shape = 23, size = 5, fill = "black")+
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 1200, 100),
+                     label =  seq(0, 1200, 100)) +
+  ggpubr::geom_pwc(ref.group = "2018",
+                   label = "p.signif")
+
+
 
 ##calculating pairwise dissimilarity between baseline and rest of the samples across timepoints
 ## we can use the same code to calculate pairwise distance for turnover, nestedness and unifrac
@@ -50,6 +85,6 @@ car::Anova(m_dist, test.statistic = "F")
 }
 dist_analysis(bray_dist)
 dist_analysis(weighted_unifrac)
-dist_analysis(soren$beta.sor)
+dist_analysis(soren$beta.sim)
 dist_analysis(soren$beta.sne)
 
