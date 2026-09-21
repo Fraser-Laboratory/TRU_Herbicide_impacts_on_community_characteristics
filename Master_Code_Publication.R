@@ -107,7 +107,7 @@ m1 <- lmer(richness ~ sprayed * ash * time + (1|site),
            subset(df_plant, year != 2018)) 
 car::Anova(m1, test.statistic = "F") %>% 
   broom::tidy() %>% 
-  write.csv("Output/Richness_lmer.csv", row.names = FALSE)
+  write.csv("Output/S02_Richness_lmer.csv", row.names = FALSE)
 simulateResiduals(m1, plot = TRUE)
 
 # Posthoc plot for species richness differences when sprayed
@@ -240,7 +240,7 @@ phy_m1 <- lmer(PD ~ sprayed * ash * time + (1|site),
                subset(pd_veg, year != 2018)) 
 car::Anova(phy_m1, test.statistic = "F") %>% 
   broom::tidy() %>% 
-  write.csv("Output/PD_lmer.csv", row.names = FALSE)
+  write.csv("Output/S03_PD_lmer.csv", row.names = FALSE)
 simulateResiduals(phy_m1, plot = TRUE)
 effectsize::eta_squared(phy_m1 , partial = TRUE)
 
@@ -387,7 +387,7 @@ veg_stress <- round(nmds$stress, 2)
 set.seed(111111)
 mod_ado <- adonis2(bray_dist ~ sprayed * ash * time, by = "term", data = meta)
 mod_ado_df <- data.frame(mod_ado)
-write.csv(mod_ado_df, "Output/veg_abundance_PERMANOVA.csv", row.names = TRUE)
+write.csv(mod_ado_df, "Output/S04_veg_abundance_PERMANOVA.csv", row.names = TRUE)
 
 # Prepare data for plotting
 plot_df <- data.frame(scores(nmds), meta) %>% 
@@ -438,7 +438,7 @@ weighted_unifrac <- unifracs[, , "d_0.5"]
 set.seed(213)
 phy_ado2 <- adonis2(weighted_unifrac ~ sprayed * ash * time, by = "term", data = meta)
 phy_ado2_df <- data.frame(phy_ado2)
-write.csv(phy_ado2_df, "Output/Weighted_Unifrac_PERMANOVA.csv", row.names = TRUE)
+write.csv(phy_ado2_df, "Output/S05_Weighted_Unifrac_PERMANOVA.csv", row.names = TRUE)
 
 # NMDS for weighted unifrac distances
 set.seed(2112)
@@ -513,18 +513,18 @@ rough_meta <- meta %>%
 set.seed(1111111)
 mod_ado1 <- adonis2(soren$beta.sim ~ sprayed * ash * time, by = "term", data = meta)
 mod_ado1_df <- data.frame(mod_ado1)
-write.csv(mod_ado1_df, "Output/Species_turnover_PERMANOVA.csv", row.names = TRUE)
+write.csv(mod_ado1_df, "Output/S06_Species_turnover_PERMANOVA.csv", row.names = TRUE)
 
 # Pairwise adonis 
 set.seed(20260525)
 pair_ado_turn <- pairwise.adonis2(soren$beta.sim ~ trt, by = "term", data = rough_meta)
 write.csv(
   pair_ado_turn$FALSE_year_1_vs_TRUE_year_1,
-  "Output/Species_turnover_PERMANOVA_year2019.csv", row.names = TRUE
+  "Output/S09_Species_turnover_PERMANOVA_year2019.csv", row.names = TRUE
 )
 write.csv(
   pair_ado_turn$FALSE_year_2_vs_TRUE_year_2,
-  "Output/Species_turnover_PERMANOVA_year2020.csv", row.names = TRUE
+  "Output/S10_Species_turnover_PERMANOVA_year2020.csv", row.names = TRUE
 )
 
 # Prepare data for plotting
@@ -571,18 +571,18 @@ turnover_plot
 set.seed(221)
 mod_ado2 <- adonis2(soren$beta.sne ~ sprayed * ash * time, by = "term", data = meta)
 mod_ado2_df <- data.frame(mod_ado2)
-write.csv(mod_ado2_df, "Output/Species_nestedness_PERMANOVA.csv", row.names = TRUE)
+write.csv(mod_ado2_df, "Output/S07_Species_nestedness_PERMANOVA.csv", row.names = TRUE)
 
 # Pairwise adonis
 set.seed(202605252)
 pair_ado_nest <- pairwise.adonis2(soren$beta.sne ~ trt, by = "term", data = rough_meta)
 write.csv(
   pair_ado_nest$FALSE_year_1_vs_TRUE_year_1,
-  "Output/Species_nest_PERMANOVA_year2019.csv", row.names = TRUE
+  "Output/S08_Species_nest_PERMANOVA_year2019.csv", row.names = TRUE
 )
 write.csv(
   pair_ado_nest$FALSE_year_2_vs_TRUE_year_2,
-  "Output/Species_nest_PERMANOVA_year2020.csv", row.names = TRUE
+  "Output/S11_Species_nest_PERMANOVA_year2020.csv", row.names = TRUE
 )
 
 # Prepare data for plotting
@@ -661,7 +661,7 @@ inv_res <- df_plant1 %>%
 mod_inv <- glmmTMB(value ~ name * year + (1|site), family = "ordbeta", inv_res)
 car::Anova(mod_inv) %>% 
   broom::tidy() %>% 
-  write.csv("Output/Relative_proportion_glmmTMB.csv", row.names = FALSE)
+  write.csv("Output/S12_Relative_proportion_glmmTMB.csv", row.names = FALSE)
 simulateResiduals(mod_inv, plot = TRUE)
 
 # Plot
