@@ -438,7 +438,7 @@ weighted_unifrac <- unifracs[, , "d_0.5"]
 set.seed(213)
 phy_ado2 <- adonis2(weighted_unifrac ~ sprayed * ash * time, by = "term", data = meta)
 phy_ado2_df <- data.frame(phy_ado2)
-write.csv(phy_ado2_df, "Output/Weighed_Unifrac_PERMANOVA.csv", row.names = TRUE)
+write.csv(phy_ado2_df, "Output/Weighted_Unifrac_PERMANOVA.csv", row.names = TRUE)
 
 # NMDS for weighted unifrac distances
 set.seed(2112)
@@ -487,7 +487,7 @@ phy_nmds <- ggplot(phy_plt1, aes(x = NMDS1, y = NMDS2, fill = sprayed)) +
     axis.text = element_text(color = "black"),
     panel.grid = element_blank()
   ) +
-  labs(title = "NMDS of weighed Unifrac distance")
+  labs(title = "NMDS of weighted Unifrac distance")
 phy_nmds
 
 # Combine plots
@@ -531,6 +531,7 @@ write.csv(
 set.seed(11)
 nmds_sim <- metaMDS(soren$beta.sim, k = 3, trymax = 999)
 plot_df_sim <- data.frame(scores(nmds_sim), meta)
+nmds_sim$stress
 
 turnover_plot <- ggplot(plot_df_sim, aes(x = NMDS1, y = NMDS2, fill = sprayed)) +
   geom_point(aes(shape = ash), size = 2) +
@@ -588,6 +589,7 @@ write.csv(
 set.seed(121)
 nmds_sne <- metaMDS(soren$beta.sne, k = 3, trymax = 999, autotransform = TRUE)
 plot_df_sne <- data.frame(scores(nmds_sne), meta)
+nmds_sne$stress
 
 nestedness_plot <- ggplot(plot_df_sne, aes(x = NMDS1, y = NMDS2, fill = sprayed)) +
   geom_point(aes(shape = ash), size = 2) +
